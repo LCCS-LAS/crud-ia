@@ -41,4 +41,24 @@ class ProdutoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nome").value("Notebook Gamer"));
     }
+
+    @Test
+    void deveRejeitarPrecoComPrecisaoInvalida() throws Exception {
+        String payload = """
+                {
+                  "nome": "Produto Inválido",
+                  "descricao": "Preço com precisão acima do permitido",
+                  "preco": 123456789.99,
+                  "quantidadeEstoque": 1
+                }
+                """;
+
+        mockMvc.perform(post("/api/produtos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.messages.preco")
+                        .value("O preço deve ter no máximo 8 dígitos inteiros e 2 casas decimais"));
+    }
+
 }
